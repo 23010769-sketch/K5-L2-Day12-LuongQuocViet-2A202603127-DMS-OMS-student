@@ -1,0 +1,39 @@
+﻿REVIEW CHÉO VIỆT – TÂM
+Ngày: 21/11/2026, giờ Việt Nam.
+
+Nguồn: D:\Download\day12-viet.zip (mine = Việt); D:\Download\Day12-Tam.zip (peer = Tâm).
+Phạm vi: đối chiếu annotations.xml và Guideline Cabin v1.0; chưa xem ảnh, chưa có xác nhận thống nhất của hai bạn.
+Hai file có cùng 22 tên ảnh và kích thước; điều này chưa tự chứng minh ảnh nguồn cùng mã Gxx. Hai bạn xác nhận cùng bộ ảnh trước khi chốt.
+
+KẾT QUẢ
+- 91 dòng khác biệt trên 10 ảnh. Số dòng là khác biệt theo trường/cờ, không phải 91 lỗi hay 91 đối tượng.
+- Việt: lần kiểm gần nhất 0 lỗi, 0 cảnh báo.
+- Tâm: 3 lỗi occupied=yes ở S01_ir, S01_rgb, S08_ir; 0 cảnh báo.
+- 3 dòng verdict=mine chỉ chốt theo miền giá trị hợp lệ (unknown so với yes không được phép). Chưa xác minh unknown là nhãn phù hợp nhất qua ảnh.
+- 88 dòng verdict=ambiguous đang chờ đối chiếu ảnh/phạm vi gán nhãn; đã ghi quy tắc và hành động cho từng dòng. Đây chưa phải kết luận hai bạn đã thống nhất hoặc đã hỏi coach.
+
+CÁC MỤC CẦN ƯU TIÊN
+1. D02: Tâm có 2 box hand, Việt không có. D05: Tâm có thêm 1 box hand (tay trái). Kiểm tra bàn tay có thấy được hay không (§4.2, §4.7).
+2. D01, D02, D04, D06: nhiều điểm mắt phía Việt cùng bật occluded=1 và outside=1. Script không cảnh báo không có nghĩa các cờ này đúng. Kiểm lại từng điểm theo §4.6.
+3. D06: Việt để toàn bộ điểm mắt trái ở (0,0), còn điểm mắt phải ở vùng mặt; Tâm để điểm mắt trái ở vùng mặt, điểm mắt phải gần (1.54,2.32). Cần xác định đúng mắt của người; không thể chốt từ tọa độ điểm ẩn.
+4. S08_rgb: Việt có child_seat tại rear_right, Tâm không có. Xác nhận vật hiện diện và đúng loại (§4.8).
+5. S01_rgb: Tâm có object/cup tại rear_left, Việt không có. S01_ir: Việt ghi cup, Tâm ghi other. Xem riêng từng ảnh (§4.4-1, §4.8).
+6. D04 seatbelt: Việt worn_correct, Tâm unknown. Cần thấy rõ đường dây mới chốt (§4.7).
+7. S08_rgb/S08_ir: thuộc tính mắt/kính trên face khác nhau; OMS chỉ yêu cầu box face (§4.1), không coi những khác biệt thuộc tính này tự động là lỗi.
+
+CÁCH HOÀN TẤT E3
+Mở disagreement_log.csv bằng Excel hoặc VS Code. Hai bạn xem ít nhất 5 dòng (hoặc tất cả nếu ít hơn 5), đọc action, đối chiếu guideline và ảnh tại CVAT local. Sửa verdict thành mine/peer/both_wrong khi đủ bằng chứng; ambiguous chỉ chốt là ca mơ hồ sau khi đã xem và thảo luận, hỏi coach nếu không thống nhất. Cập nhật action bằng kết quả thực tế và việc đã sửa. Chưa ghi nhận hai bạn đã thực hiện bước này.
+Nếu sửa nhãn của Việt: sửa trên CVAT, export_final_v2.zip không kèm ảnh rồi chạy check --expect 22 --out check_final_v2.txt.
+Script diff chỉ so cờ face13, không so vị trí các điểm. Phải tự so điểm trên CVAT; các box ghép được với IoU >= 0.5 cũng chưa chắc ôm sát đúng.
+Đã dùng Codex để chạy kiểm tra, so sánh XML và gợi ý quy tắc/hướng xử lý; ghi việc này vào prompts.md khi hoàn thiện hồ sơ.
+Không thay đổi hai file export hoặc nhãn trên CVAT trong lần review này.
+
+SHA-256 NGUỒN
+mine: ef2f0ed72f3833acb4c043d6fad2c43175d4257d1a0c93df289ad4c5bfc5c732
+peer: 79370ac92ebf1ca6a14351ab4712c55dfd44f6a60555f015130c1310f2707b78
+
+GHI CHÚ PHÂN XỬ THEO GUIDELINE
+- Có thể chốt về miền giá trị, không cần nhìn ảnh: ba giá trị child_seat.occupied=yes của Tâm không hợp lệ. Verdict mine trong disagreement_log chỉ có nghĩa giá trị unknown của Việt hợp lệ hơn về schema; chưa khẳng định unknown là trạng thái quan sát đúng. Trên ảnh, nếu thấy ghế trống thì chọn no, nếu không rõ thì chọn unknown.
+- S08_rgb/S08_ir: thuộc tính eye/glasses của face không nằm trong yêu cầu gán OMS; không cần ép hai bản giống nhau. Khác biệt này không chứng minh bên nào sai.
+- face13: occluded và outside diễn tả hai trường hợp khác nhau. Không bật cả hai cờ cho cùng một điểm; phải xem điểm trên ảnh để chọn cờ phù hợp. Những dòng khác cờ trong D01–D06 vẫn cần kiểm tra trực tiếp.
+- Các khác biệt về box hand/object/child_seat, seatbelt, mắt, kính, gaze_zone và tọa độ face13 phụ thuộc nội dung ảnh; không thể chốt chỉ bằng XML. Chưa ghi nhận thay đổi nhãn hay export v2.
